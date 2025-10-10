@@ -1,3 +1,3 @@
 <template>
-  <div>>iniso</div>
+  <div>iniso</div>
 </template>

@@ -1,0 +1,18 @@
+{
+  "recommendations": [
+    // Vue - Official
+    "vue.volar",
+
+    // Iconify IntelliSense
+    "antfu.iconify",
+
+    // Tailwind CSS IntelliSense 0.4.16
+    "bradlc.vscode-tailwindcss",
+
+    // Prettier - Code formatter
+    "esbenp.prettier-vscode"
+
+    // Ninghao Dark Theme
+    // "ninghao.ninghao-vscode-color-theme"
+  ]
+}

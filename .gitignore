@@ -22,3 +22,13 @@ logs
 .env
 .env.*
 !.env.example
+
+# App
+.vscode/*
+!.vscode/extensions.json
+.turbo
+.data
+.vercel
+.cursorignore
+.cursor
+.obsidian
