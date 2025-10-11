@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ButtonDemo from './components/button-demo.vue';
 import TagsInputDemo from './components/tags-input-demo.vue';
+import TabsDemo from './components/tabs-demo.vue';
 import ToggleDemo from './components/toggle-demo.vue';
 import TooltipDemo from './components/tooltip-demo.vue';
 </script>
@@ -17,6 +18,9 @@ import TooltipDemo from './components/tooltip-demo.vue';
 
     <!-- Tags Input Demo -->
     <TagsInputDemo />
+
+    <!-- Tabs Demo -->
+    <TabsDemo />
 
     <!-- Toggle Demo -->
     <ToggleDemo />
