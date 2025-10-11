@@ -1,4 +1,11 @@
 import tailwindcss from '@tailwindcss/vite';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+/**
+ * Get the current directory path using the import.meta.url
+ */
+const currentDir = dirname(fileURLToPath(import.meta.url));
 
 /**
  * Nuxt configuration
@@ -23,7 +30,7 @@ export default defineNuxtConfig({
   /**
    * CSS files to include globally
    */
-  css: ['~/assets/css/tailwind.css'],
+  css: [join(currentDir, './app/assets/css/tailwind.css')],
 
   /**
    * Vite plugins
@@ -50,6 +57,6 @@ export default defineNuxtConfig({
      * Directory that the component lives in.
      * @default ./components/ui
      */
-    componentDir: './app/components/ui',
+    componentDir: join(currentDir, './app/components/ui'),
   },
 });
