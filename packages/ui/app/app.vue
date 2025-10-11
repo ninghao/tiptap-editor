@@ -1,6 +1,7 @@
+<script setup lang="ts">
+import DemoIndex from './demo/index.vue';
+</script>
+
 <template>
-  <div>
-    <h1>@shu/ui</h1>
-    <Button>Click me</Button>
-  </div>
+  <DemoIndex />
 </template>
