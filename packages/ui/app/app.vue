@@ -1,7 +1,3 @@
-<script setup lang="ts">
-import DemoIndex from './demo/index.vue';
-</script>
-
 <template>
-  <DemoIndex />
+  <h1>@iniso/ui</h1>
 </template>
