@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "catalog:",
+    "@tanstack/vue-table": "catalog:",
     "@types/node": "catalog:",
     "@vueuse/core": "catalog:",
     "class-variance-authority": "catalog:",
