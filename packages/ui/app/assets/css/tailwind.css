@@ -2,6 +2,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Source path for Tailwind CSS configuration */
+/* Fix nuxt layer problem */
+@source "../../";
+@source "../../../";
+
 /* Custom dark mode variant for nested dark mode support */
 @custom-variant dark (&:is(.dark *));
 
