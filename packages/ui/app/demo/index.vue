@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import ButtonDemo from './components/button-demo.vue'
-import TooltipDemo from './components/tooltip-demo.vue'
+import ButtonDemo from './components/button-demo.vue';
+import ToggleDemo from './components/toggle-demo.vue';
+import TooltipDemo from './components/tooltip-demo.vue';
 </script>
 
 <template>
@@ -9,10 +10,13 @@ import TooltipDemo from './components/tooltip-demo.vue'
       <h1 class="text-3xl font-bold">@iniso/ui</h1>
       <p class="text-muted-foreground">Component Library Demo</p>
     </div>
-    
+
     <!-- Button Demo -->
     <ButtonDemo />
-    
+
+    <!-- Toggle Demo -->
+    <ToggleDemo />
+
     <!-- Tooltip Demo -->
     <TooltipDemo />
   </div>
