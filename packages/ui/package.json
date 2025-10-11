@@ -14,6 +14,7 @@
     "@tailwindcss/vite": "catalog:",
     "@tanstack/vue-table": "catalog:",
     "@types/node": "catalog:",
+    "@vee-validate/zod": "catalog:",
     "@vueuse/core": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
@@ -25,8 +26,10 @@
     "tailwindcss": "catalog:",
     "tw-animate-css": "catalog:",
     "typescript": "catalog:",
+    "vee-validate": "catalog:",
     "vue": "catalog:",
     "vue-router": "catalog:",
-    "vue-sonner": "catalog:"
+    "vue-sonner": "catalog:",
+    "zod": "catalog:"
   }
 }
