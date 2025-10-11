@@ -37,4 +37,19 @@ export default defineNuxtConfig({
    * Nuxt Modules
    */
   modules: ['shadcn-nuxt'],
+
+  /**
+   * Shadcn Nuxt Configuration
+   */
+  shadcn: {
+    /**
+     * Prefix for all the imported component
+     */
+    prefix: '',
+    /**
+     * Directory that the component lives in.
+     * @default ./components/ui
+     */
+    componentDir: './components/ui',
+  },
 });
