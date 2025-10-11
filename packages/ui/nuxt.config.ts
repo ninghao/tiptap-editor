@@ -32,4 +32,9 @@ export default defineNuxtConfig({
     // Tailwind CSS
     plugins: [tailwindcss()],
   },
+
+  /**
+   * Nuxt Modules
+   */
+  modules: ['shadcn-nuxt'],
 });
