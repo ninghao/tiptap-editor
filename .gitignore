@@ -26,6 +26,7 @@ logs
 # App
 .vscode/*
 !.vscode/extensions.json
+!.vscode/blank
 .turbo
 .data
 .vercel
