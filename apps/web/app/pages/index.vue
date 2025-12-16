@@ -1,9 +1,14 @@
 <template>
-  <div class="container mx-auto p-8 max-w-4xl">
-    <h1 class="text-3xl font-bold mb-6">Tiptap Editor 演示</h1>
-
-    <div class="border rounded-lg shadow-sm">
-      <EditorContent :editor="editor" class="prose max-w-none" />
+  <div class="container mx-auto max-w-6xl flex">
+    <div class="flex gap-4 h-full flex-1 min-h-screen">
+      <!-- 编辑器区域 -->
+      <div class="min-w-md flex-1">
+        <EditorContent :editor="editor" class="prose max-w-none h-full" />
+      </div>
+      <!-- JSON 显示区域 -->
+      <div class="mb-6 my-4 max-h-screen overflow-scroll">
+        <pre class="font-mono text-xs">{{ editorJson }}</pre>
+      </div>
     </div>
   </div>
 </template>
@@ -11,29 +16,36 @@
 <script setup lang="ts">
 import { useEditor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
-import { onBeforeUnmount } from 'vue';
+import { onBeforeUnmount, ref } from 'vue';
+
+const editorJson = ref('{}');
+
+const updateJson = () => {
+  if (editor.value) {
+    try {
+      editorJson.value = JSON.stringify(editor.value.getJSON(), null, 2);
+    } catch (error) {
+      editorJson.value = '{}';
+    }
+  }
+};
 
 const editor = useEditor({
   extensions: [StarterKit],
   content: `
     <h1>欢迎使用 Tiptap Editor</h1>
-    <p>这是一个功能强大的富文本编辑器演示。</p>
-    <p>你可以在这里输入和编辑内容，支持以下功能：</p>
-    <ul>
-      <li><strong>粗体文本</strong></li>
-      <li><em>斜体文本</em></li>
-      <li><code>代码块</code></li>
-      <li>有序列表和无序列表</li>
-      <li>标题（H1-H6）</li>
-      <li>引用块</li>
-    </ul>
-    <p>试试看吧！</p>
   `,
   editorProps: {
     attributes: {
       class:
         'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[300px] p-4',
     },
+  },
+  onUpdate: () => {
+    updateJson();
+  },
+  onCreate: () => {
+    updateJson();
   },
 });
 
