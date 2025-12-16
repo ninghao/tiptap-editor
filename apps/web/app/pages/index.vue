@@ -17,6 +17,9 @@
 import { useEditor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import { onBeforeUnmount, ref } from 'vue';
+import Collaboration from '@tiptap/extension-collaboration';
+import * as Y from 'yjs';
+const doc = new Y.Doc(); // Initialize Y.Doc for shared editing
 
 const editorJson = ref('{}');
 
@@ -31,7 +34,12 @@ const updateJson = () => {
 };
 
 const editor = useEditor({
-  extensions: [StarterKit],
+  extensions: [
+    StarterKit,
+    Collaboration.configure({
+      document: doc, // Configure Y.Doc for collaboration
+    }),
+  ],
   content: `
     <h1>欢迎使用 Tiptap Editor</h1>
   `,
