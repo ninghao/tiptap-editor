@@ -35,7 +35,9 @@ const updateJson = () => {
 
 const editor = useEditor({
   extensions: [
-    StarterKit,
+    StarterKit.configure({
+      undoRedo: false, // Disables default Undo/Redo extension to use Collaboration's history management
+    }),
     Collaboration.configure({
       document: doc, // Configure Y.Doc for collaboration
     }),
