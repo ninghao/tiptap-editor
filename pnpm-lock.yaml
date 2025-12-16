@@ -89,6 +89,9 @@ importers:
       '@iniso/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@tiptap-pro/provider':
+        specifier: ^3.3.0
+        version: 3.3.0(@hocuspocus/provider@3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(lib0@0.2.115)(yjs@13.6.27)
       '@tiptap/core':
         specifier: ^3.13.0
         version: 3.13.0(@tiptap/pm@3.13.0)
@@ -492,6 +495,15 @@ packages:
   '@floating-ui/vue@1.1.9':
     resolution: {integrity: sha512-BfNqNW6KA83Nexspgb9DZuz578R7HT8MZw1CfK9I6Ah4QReNWEJsXWHN+SdmOVLNGmTPDi+fDT535Df5PzMLbQ==}
 
+  '@hocuspocus/common@3.4.3':
+    resolution: {integrity: sha512-wnBBO9sWcVAoUPEXN1qO+zk3HaEF9VTemxB6kjuuH6e1dHnD0v12m4P4X1wiZVhmMIX/PMl/fu3MGtYWQJz8gA==}
+
+  '@hocuspocus/provider@3.4.3':
+    resolution: {integrity: sha512-zt+UgVXGsEQrqnDZgavc2PT9yKJjmVjV+5YxvhlmFVFLVORqawT4l601aKmLPhvyK97un4ZApZ5rso8iO6crWg==}
+    peerDependencies:
+      y-protocols: ^1.0.6
+      yjs: ^13.6.8
+
   '@internationalized/date@3.10.0':
     resolution: {integrity: sha512-oxDR/NTEJ1k+UFVQElaNIk65E/Z83HK1z1WI3lQyhTtnNg4R5oVXaPzK3jcpKG8UHKDVuDQHzn+wsxSz8RP3aw==}
 
@@ -533,6 +545,9 @@ packages:
 
   '@kwsites/promise-deferred@1.1.1':
     resolution: {integrity: sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==}
+
+  '@lifeomic/attempt@3.1.0':
+    resolution: {integrity: sha512-QZqem4QuAnAyzfz+Gj5/+SLxqwCAw2qmt7732ZXodr6VDWGeYLG6w1i/vYLa55JQM9wRuBKLmXmiZ2P0LtE5rw==}
 
   '@mapbox/node-pre-gyp@2.0.0':
     resolution: {integrity: sha512-llMXd39jtP0HpQLVI37Bf1m2ADlEb35GYSh1SDSLsBhR+5iCxiNGlT31yqbNtVHygHAtMy6dWFERpU2JgufhPg==}
@@ -1385,6 +1400,13 @@ packages:
     resolution: {integrity: sha512-vhF7kEU9EXWXh+HdAwKJ2m3xaOnTTmgcdXcF2pim8g4GvI7eRrk2YRuV5nUlZnd/NbCIX4/Ja2OZu5EjJL06Ww==}
     peerDependencies:
       vue: ^2.7.0 || ^3.0.0
+
+  '@tiptap-pro/provider@3.3.0':
+    resolution: {integrity: sha512-fowdD8dMixDhYbRV3QkTnq98XEFNC+yOPIa2ormQ9hSGKVPNQRizJbasRCg74Cg0DGLXsU1re3wG9+olGbno4g==}
+    peerDependencies:
+      '@hocuspocus/provider': ^3.2.0
+      lib0: ^0.2.99
+      yjs: ^13.6.20
 
   '@tiptap/core@3.13.0':
     resolution: {integrity: sha512-iUelgiTMgPVMpY5ZqASUpk8mC8HuR9FWKaDzK27w9oWip9tuB54Z8mePTxNcQaSPb6ErzEaC8x8egrRt7OsdGQ==}
@@ -4343,6 +4365,22 @@ snapshots:
       - '@vue/composition-api'
       - vue
 
+  '@hocuspocus/common@3.4.3':
+    dependencies:
+      lib0: 0.2.115
+
+  '@hocuspocus/provider@3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27)':
+    dependencies:
+      '@hocuspocus/common': 3.4.3
+      '@lifeomic/attempt': 3.1.0
+      lib0: 0.2.115
+      ws: 8.18.3
+      y-protocols: 1.0.6(yjs@13.6.27)
+      yjs: 13.6.27
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
   '@internationalized/date@3.10.0':
     dependencies:
       '@swc/helpers': 0.5.17
@@ -4397,6 +4435,8 @@ snapshots:
       - supports-color
 
   '@kwsites/promise-deferred@1.1.1': {}
+
+  '@lifeomic/attempt@3.1.0': {}
 
   '@mapbox/node-pre-gyp@2.0.0':
     dependencies:
@@ -5168,6 +5208,12 @@ snapshots:
     dependencies:
       '@tanstack/virtual-core': 3.13.12
       vue: 3.5.22(typescript@5.9.3)
+
+  '@tiptap-pro/provider@3.3.0(@hocuspocus/provider@3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(lib0@0.2.115)(yjs@13.6.27)':
+    dependencies:
+      '@hocuspocus/provider': 3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27)
+      lib0: 0.2.115
+      yjs: 13.6.27
 
   '@tiptap/core@3.13.0(@tiptap/pm@3.13.0)':
     dependencies:

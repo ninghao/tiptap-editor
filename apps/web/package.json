@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@iniso/ui": "workspace:*",
+    "@tiptap-pro/provider": "^3.3.0",
     "@tiptap/core": "^3.13.0",
     "@tiptap/extension-collaboration": "^3.13.0",
     "@tiptap/pm": "^3.13.0",
