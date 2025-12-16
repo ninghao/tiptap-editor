@@ -19,7 +19,10 @@ import StarterKit from '@tiptap/starter-kit';
 import { onBeforeUnmount, ref } from 'vue';
 import Collaboration from '@tiptap/extension-collaboration';
 import * as Y from 'yjs';
+import { TiptapCollabProvider } from '@tiptap-pro/provider';
+
 const doc = new Y.Doc(); // Initialize Y.Doc for shared editing
+let provider: TiptapCollabProvider | null = null;
 
 const editorJson = ref('{}');
 
@@ -57,6 +60,21 @@ const editor = useEditor({
   onCreate: () => {
     updateJson();
   },
+});
+
+const config = useRuntimeConfig();
+
+onMounted(async () => {
+  provider = new TiptapCollabProvider({
+    name: 'document.demo', // Unique document identifier for syncing. This is your document name.
+    appId: config.public.tiptap.documentServerId, // Your Cloud Dashboard AppID or `baseURL` for on-premises
+    token: config.public.tiptap.documentAppJwt, // Your JWT token
+    document: doc,
+  });
+});
+
+onBeforeUnmount(() => {
+  provider?.destroy();
 });
 
 onBeforeUnmount(() => {

@@ -24,6 +24,12 @@ export default defineNuxtConfig({
   extends: ['@iniso/ui'],
 
   runtimeConfig: {
+    public: {
+      tiptap: {
+        documentServerId: '',
+        documentAppJwt: '',
+      },
+    },
     tiptap: {
       documentServerId: '',
       documentAppSecret: '',
