@@ -33,3 +33,4 @@ logs
 .cursorignore
 .cursor
 .obsidian
+.npmrc
