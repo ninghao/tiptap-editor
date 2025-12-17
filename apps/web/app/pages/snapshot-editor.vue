@@ -1,20 +1,25 @@
 <template>
   <div class="grid grid-cols-3 gap-4 items-start">
-    <div class="col-span-2 space-y-4">
-      <div class="flex items-center gap-2">
-        <Button @click="save">Save</Button>
-      </div>
-
+    <div class="col-span-2">
       <EditorContent :editor="editor" class="prose max-w-none h-full" />
     </div>
 
     <div class="space-y-3 rounded border p-3 sticky top-4">
-      <h3 class="text-lg font-semibold">版本列表</h3>
+      <div class="flex items-center justify-between gap-2">
+        <div>
+          <h3 class="text-lg font-semibold leading-none">版本列表</h3>
+          <span class="text-xs text-gray-500">当前版本：{{ currentVersion ?? '—' }}</span>
+        </div>
+        <Button size="sm" @click="save">Save</Button>
+      </div>
       <div v-if="versions.length" class="space-y-2">
         <div
           v-for="version in versions"
           :key="version.version"
-          class="flex items-center justify-between rounded border px-3 py-2"
+          class="flex items-center justify-between gap-3 rounded border px-3 py-2"
+          :class="{
+            'border-blue-500 bg-blue-50': currentVersion === version.version,
+          }"
         >
           <div>
             <div class="font-medium">
@@ -22,8 +27,24 @@
             </div>
             <div class="text-xs text-gray-500">版本号：{{ version.version }}</div>
           </div>
-          <div class="text-sm text-gray-500">
-            {{ formatDate(version.date) }}
+          <div class="flex items-center gap-3">
+            <span
+              v-if="currentVersion === version.version"
+              class="rounded-full bg-blue-100 text-blue-700 text-xs px-2 py-0.5"
+            >
+              当前
+            </span>
+            <div class="text-sm text-gray-500">
+              {{ formatDate(version.date) }}
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              :disabled="currentVersion === version.version"
+              @click="revert(version.version)"
+            >
+              恢复
+            </Button>
           </div>
         </div>
       </div>
@@ -58,6 +79,7 @@ const provider = new TiptapCollabProvider({
 // });
 
 const versions = ref<SnapshotVersion[]>([]);
+const currentVersion = ref<number | null>(null);
 
 const editor = useEditor({
   // 编辑器扩展配置
@@ -74,6 +96,7 @@ const editor = useEditor({
       provider,
       onUpdate: (payload) => {
         versions.value = payload.versions;
+        currentVersion.value = payload.currentVersion ?? null;
       },
     }),
   ],
@@ -88,11 +111,16 @@ const editor = useEditor({
   onCreate: ({ editor }) => {
     const snapshotStorage = editor.storage as unknown as { snapshot?: SnapshotStorage };
     versions.value = snapshotStorage.snapshot?.versions ?? [];
+    currentVersion.value = snapshotStorage.snapshot?.currentVersion ?? null;
   },
 });
 
 const save = () => {
   editor.value?.commands.saveVersion(new Date().toISOString());
+};
+
+const revert = (versionNumber: number) => {
+  editor.value?.commands.revertToVersion(versionNumber, `回滚到版本 ${versionNumber}`);
 };
 
 const formatDate = (timestamp?: number) => {
