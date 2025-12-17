@@ -321,3 +321,27 @@ export function watchPreviewContent(
 }
 
 export default Snapshot;
+
+// Extend Tiptap Commands interface with snapshot commands
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    snapshot: {
+      /**
+       * Save a new version with an optional name
+       */
+      saveVersion: (name?: string) => ReturnType;
+      /**
+       * Revert the document to a specific version
+       */
+      revertToVersion: (
+        version: number,
+        newVersionName?: string,
+        currentVersionName?: string,
+      ) => ReturnType;
+      /**
+       * Toggle automatic versioning on/off
+       */
+      toggleVersioning: () => ReturnType;
+    };
+  }
+}
