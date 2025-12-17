@@ -7,18 +7,10 @@
         <div>
           <h3 class="font-semibold mb-2 text-purple-800">✨ 主要功能</h3>
           <ul class="list-disc list-inside space-y-1 ml-4">
-            <li>
-              <strong>用户存在感知</strong>：实时显示所有在线协作者及其状态信息
-            </li>
-            <li>
-              <strong>鼠标位置跟踪</strong>：实时显示其他用户的鼠标位置（在编辑器区域内）
-            </li>
-            <li>
-              <strong>自定义用户信息</strong>：每个用户可以设置自己的名称和颜色
-            </li>
-            <li>
-              <strong>实时状态更新</strong>：通过 Awareness API 实时同步用户活动
-            </li>
+            <li><strong>用户存在感知</strong>：实时显示所有在线协作者及其状态信息</li>
+            <li><strong>鼠标位置跟踪</strong>：实时显示其他用户的鼠标位置（在编辑器区域内）</li>
+            <li><strong>自定义用户信息</strong>：每个用户可以设置自己的名称和颜色</li>
+            <li><strong>实时状态更新</strong>：通过 Awareness API 实时同步用户活动</li>
           </ul>
         </div>
         <div>
@@ -38,8 +30,8 @@
                 connectionStatus === 'connected'
                   ? 'bg-green-500'
                   : connectionStatus === 'connecting'
-                    ? 'bg-yellow-500'
-                    : 'bg-red-500'
+                  ? 'bg-yellow-500'
+                  : 'bg-red-500'
               "
             ></div>
             <span class="text-sm font-semibold">
@@ -49,8 +41,8 @@
                   connectionStatus === 'connected'
                     ? 'text-green-600'
                     : connectionStatus === 'connecting'
-                      ? 'text-yellow-600'
-                      : 'text-red-600'
+                    ? 'text-yellow-600'
+                    : 'text-red-600'
                 "
               >
                 {{ connectionStatusText }}
@@ -118,8 +110,8 @@
                 connectionStatus === 'connected'
                   ? 'bg-green-100 text-green-700'
                   : connectionStatus === 'connecting'
-                    ? 'bg-yellow-100 text-yellow-700'
-                    : 'bg-red-100 text-red-700'
+                  ? 'bg-yellow-100 text-yellow-700'
+                  : 'bg-red-100 text-red-700'
               "
             >
               {{ connectionStatusText }}
@@ -160,7 +152,10 @@
                 <div class="text-xs text-gray-500">用户 ID: {{ user.clientId }}</div>
               </div>
             </div>
-            <div v-if="user.mouseX !== undefined && user.mouseY !== undefined" class="text-xs text-gray-600 mt-2">
+            <div
+              v-if="user.mouseX !== undefined && user.mouseY !== undefined"
+              class="text-xs text-gray-600 mt-2"
+            >
               <div>鼠标位置: ({{ Math.round(user.mouseX) }}, {{ Math.round(user.mouseY) }})</div>
             </div>
             <div class="text-xs text-gray-400 mt-1">
@@ -502,4 +497,3 @@ onBeforeUnmount(() => {
   pointer-events: none;
 }
 </style>
-
