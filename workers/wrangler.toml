@@ -1,0 +1,16 @@
+name = "tiptap-collaboration"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[durable_objects]
+bindings = [
+  { name = "DOCUMENT", class_name = "Document" }
+]
+
+[[durable_objects.migrations]]
+tag = "v1"
+new_classes = ["Document"]
+
+[vars]
+# 可以在这里添加环境变量
+

@@ -29,6 +29,12 @@
       >
         修改追踪编辑器（增量更新追踪）
       </NuxtLink>
+      <NuxtLink
+        to="/snapshot-editor"
+        class="inline-block px-6 py-3 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors text-center"
+      >
+        版本历史编辑器（Snapshot）
+      </NuxtLink>
     </div>
   </div>
 </template>
