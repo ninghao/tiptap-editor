@@ -45,6 +45,13 @@ export interface SnapshotOptions {
 }
 
 /**
+ * Stateless event from TiptapCollabProvider
+ */
+interface StatelessEvent {
+  payload: string;
+}
+
+/**
  * Snapshot Extension for Tiptap
  *
  * This extension provides version control and snapshot functionality for collaborative editing.
@@ -114,7 +121,7 @@ Thank you for understanding and supporting our efforts to provide high - quality
     }
 
     // Listen to stateless events
-    this.options.provider.on('stateless', (event) => {
+    this.options.provider.on('stateless', (event: StatelessEvent) => {
       const payload = JSON.parse(event.payload);
 
       switch (payload.event) {
@@ -301,7 +308,7 @@ export function watchPreviewContent(
   callback: (content: any) => void,
   fieldName: string = 'default',
 ): () => void {
-  const handler = (event: any) => {
+  const handler = (event: StatelessEvent) => {
     if (!event) {
       return;
     }
