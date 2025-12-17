@@ -9,6 +9,7 @@ import StarterKit from '@tiptap/starter-kit'; // Tiptap 基础功能包（包含
 import Collaboration from '@tiptap/extension-collaboration'; // Tiptap 协作扩展
 import * as Y from 'yjs'; // Yjs CRDT 库，用于实现协作编辑
 import TiptapCollabProvider from '@tiptap-pro/provider';
+import { BroadcastChannelProvider } from '~/lib/broadcast-channel-provider';
 
 const doc = new Y.Doc();
 
@@ -35,10 +36,14 @@ const editor = useEditor({
   },
 });
 
-const provider = new TiptapCollabProvider({
-  name: 'snapshot-demo', // Unique document identifier for syncing. This is your document name.
-  appId: config.public.tiptap?.documentServerId, // Your Cloud Dashboard AppID or `baseURL` for on-premises
-  token: config.public.tiptap?.documentAppJwt, // Your JWT token
+// const provider = new TiptapCollabProvider({
+//   name: 'snapshot-demo', // Unique document identifier for syncing. This is your document name.
+//   appId: config.public.tiptap?.documentServerId, // Your Cloud Dashboard AppID or `baseURL` for on-premises
+//   token: config.public.tiptap?.documentAppJwt, // Your JWT token
+//   document: doc,
+// });
+const provider = new BroadcastChannelProvider({
+  name: 'snapshot-demo',
   document: doc,
 });
 </script>
