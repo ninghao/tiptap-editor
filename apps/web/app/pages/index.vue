@@ -23,6 +23,12 @@
       >
         Awareness 协作编辑器（用户感知）
       </NuxtLink>
+      <NuxtLink
+        to="/change-tracking-editor"
+        class="inline-block px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-center"
+      >
+        修改追踪编辑器（增量更新追踪）
+      </NuxtLink>
     </div>
   </div>
 </template>
