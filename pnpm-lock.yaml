@@ -110,6 +110,9 @@ importers:
       '@tiptap-pro/extension-snapshot':
         specifier: ^3.3.0
         version: 3.3.0(@hocuspocus/provider@3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(@hocuspocus/transformer@3.4.3(@tiptap/core@3.13.0(@tiptap/pm@3.13.0))(@tiptap/pm@3.13.0)(y-prosemirror@1.3.7(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.4)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(yjs@13.6.27))(@tiptap-pro/provider@3.3.0(@hocuspocus/provider@3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(lib0@0.2.115)(yjs@13.6.27))(@tiptap/core@3.13.0(@tiptap/pm@3.13.0))(@tiptap/pm@3.13.0)(yjs@13.6.27)
+      '@tiptap-pro/extension-snapshot-compare':
+        specifier: 3.3.0-alpha.10
+        version: 3.3.0-alpha.10(@hocuspocus/provider@3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(@tiptap-pro/provider@3.3.0(@hocuspocus/provider@3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(lib0@0.2.115)(yjs@13.6.27))(@tiptap/core@3.13.0(@tiptap/pm@3.13.0))(@tiptap/pm@3.13.0)(@tiptap/y-tiptap@3.0.1(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.4)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(yjs@13.6.27)
       '@tiptap-pro/provider':
         specifier: ^3.3.0
         version: 3.3.0(@hocuspocus/provider@3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(lib0@0.2.115)(yjs@13.6.27)
@@ -1430,6 +1433,16 @@ packages:
     peerDependencies:
       vue: ^2.7.0 || ^3.0.0
 
+  '@tiptap-pro/extension-snapshot-compare@3.3.0-alpha.10':
+    resolution: {integrity: sha512-R08HDIDzhqeO28yAiL6JqgUg5mzsNX1tDqvWOHVVnyFiTWWdl4Xi/PN7VRqWQiPTaSoP0FBmYp/TYetuiUh4vQ==}
+    peerDependencies:
+      '@hocuspocus/provider': ^3.2.0
+      '@tiptap-pro/provider': ^3.3.0
+      '@tiptap/core': ^3.0.1
+      '@tiptap/pm': ^3.0.1
+      '@tiptap/y-tiptap': ^3.0.0
+      yjs: ^13.6.7
+
   '@tiptap-pro/extension-snapshot@3.3.0':
     resolution: {integrity: sha512-Ma7JvRYV1e++cFc8ZcGgVcKJNYS71zlOcXv91cozce5lhIUnYDhZSqWkA1YeJQ8uSHDJP1GYHuJVRBRm5fij0A==}
     peerDependencies:
@@ -2328,6 +2341,9 @@ packages:
   exsolve@1.0.7:
     resolution: {integrity: sha512-VO5fQUzZtI6C+vx4w/4BWJpg3s/5l+6pRQEHzFRM8WFi4XffSP1Z+4qi7GbjWbvRQEbdIco5mIMq+zX4rPuLrw==}
 
+  fast-equals@3.0.3:
+    resolution: {integrity: sha512-NCe8qxnZFARSHGztGMZOO/PC1qa5MIFB5Hp66WdzbCRAz8U8US3bx1UTgLS49efBQPcUtO9gf5oVEY8o7y/7Kg==}
+
   fast-fifo@1.3.2:
     resolution: {integrity: sha512-/d9sfos4yxzpwkDkuN7k2SqFKtYNmCTzgfEpz82x34IM9/zc8KGxQoXg1liNC/izpRM/MBdt44Nmx41ZWqk+FQ==}
 
@@ -2792,6 +2808,9 @@ packages:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
 
+  micro-memoize@4.2.0:
+    resolution: {integrity: sha512-dRxIsNh0XosO9sd3aASUabKOzG9dloLO41g74XUGThpHBoGm1ttakPT5in14CuW/EDedkniaShFHbymmmKGOQA==}
+
   micromatch@4.0.8:
     resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
     engines: {node: '>=8.6'}
@@ -2842,6 +2861,10 @@ packages:
 
   mocked-exports@0.1.1:
     resolution: {integrity: sha512-aF7yRQr/Q0O2/4pIXm6PZ5G+jAd7QS4Yu8m+WEeEHGnbo+7mE36CbLSDQiXYV8bVL3NfmdeqPJct0tUlnjVSnA==}
+
+  moize@6.1.7:
+    resolution: {integrity: sha512-8/9XgYooMo7/q5tf6zGF4+Wp1jx5sbxV87uK6YvTq9rgDtusLWZCZ8c5C0EhYZbNGudul5EMeMsObO4Ug/gszg==}
+    deprecated: This library has been deprecated in favor of micro-memoize, which as-of version 5 incorporates most of the functionality that this library offers at nearly half the size and better speed.
 
   mrmime@2.0.1:
     resolution: {integrity: sha512-Y3wQdFg2Va6etvQ5I82yUhGdsKrcYox6p7FfL1LbK2J4V01F9TGlepTIhnK24t7koZibmg82KGglhA1XK5IsLQ==}
@@ -5266,6 +5289,16 @@ snapshots:
       '@tanstack/virtual-core': 3.13.12
       vue: 3.5.22(typescript@5.9.3)
 
+  '@tiptap-pro/extension-snapshot-compare@3.3.0-alpha.10(@hocuspocus/provider@3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(@tiptap-pro/provider@3.3.0(@hocuspocus/provider@3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(lib0@0.2.115)(yjs@13.6.27))(@tiptap/core@3.13.0(@tiptap/pm@3.13.0))(@tiptap/pm@3.13.0)(@tiptap/y-tiptap@3.0.1(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.4)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(yjs@13.6.27)':
+    dependencies:
+      '@hocuspocus/provider': 3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27)
+      '@tiptap-pro/provider': 3.3.0(@hocuspocus/provider@3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(lib0@0.2.115)(yjs@13.6.27)
+      '@tiptap/core': 3.13.0(@tiptap/pm@3.13.0)
+      '@tiptap/pm': 3.13.0
+      '@tiptap/y-tiptap': 3.0.1(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.4)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27)
+      moize: 6.1.7
+      yjs: 13.6.27
+
   '@tiptap-pro/extension-snapshot@3.3.0(@hocuspocus/provider@3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(@hocuspocus/transformer@3.4.3(@tiptap/core@3.13.0(@tiptap/pm@3.13.0))(@tiptap/pm@3.13.0)(y-prosemirror@1.3.7(prosemirror-model@1.25.4)(prosemirror-state@1.4.4)(prosemirror-view@1.41.4)(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(yjs@13.6.27))(@tiptap-pro/provider@3.3.0(@hocuspocus/provider@3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27))(lib0@0.2.115)(yjs@13.6.27))(@tiptap/core@3.13.0(@tiptap/pm@3.13.0))(@tiptap/pm@3.13.0)(yjs@13.6.27)':
     dependencies:
       '@hocuspocus/provider': 3.4.3(y-protocols@1.0.6(yjs@13.6.27))(yjs@13.6.27)
@@ -6263,6 +6296,8 @@ snapshots:
 
   exsolve@1.0.7: {}
 
+  fast-equals@3.0.3: {}
+
   fast-fifo@1.3.2: {}
 
   fast-glob@3.3.3:
@@ -6700,6 +6735,8 @@ snapshots:
 
   merge2@1.4.1: {}
 
+  micro-memoize@4.2.0: {}
+
   micromatch@4.0.8:
     dependencies:
       braces: 3.0.3
@@ -6741,6 +6778,11 @@ snapshots:
       ufo: 1.6.1
 
   mocked-exports@0.1.1: {}
+
+  moize@6.1.7:
+    dependencies:
+      fast-equals: 3.0.3
+      micro-memoize: 4.2.0
 
   mrmime@2.0.1: {}
 
