@@ -17,6 +17,12 @@
       >
         云端协作编辑器（TiptapCollabProvider）
       </NuxtLink>
+      <NuxtLink
+        to="/awareness-editor"
+        class="inline-block px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-center"
+      >
+        Awareness 协作编辑器（用户感知）
+      </NuxtLink>
     </div>
   </div>
 </template>
