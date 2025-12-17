@@ -1,97 +1,14 @@
 <template>
-  <div class="container mx-auto max-w-6xl flex">
-    <div class="flex gap-4 h-full flex-1 min-h-screen">
-      <!-- 编辑器区域 -->
-      <div class="min-w-md flex-1">
-        <EditorContent :editor="editor" class="prose max-w-none h-full" />
-      </div>
-      <!-- JSON 显示区域 -->
-      <div class="mb-6 my-4 max-h-screen overflow-scroll">
-        <pre class="font-mono text-xs">{{ editorJson }}</pre>
-      </div>
-    </div>
+  <div class="container mx-auto p-8 max-w-4xl">
+    <h1 class="text-3xl font-bold mb-6">Tiptap Editor 演示</h1>
+    <p class="text-gray-600 mb-8">
+      这是一个功能强大的富文本编辑器演示页面，支持实时协作编辑和本地持久化。
+    </p>
+    <NuxtLink
+      to="/local-collaboration-editor"
+      class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+    >
+      打开编辑器演示
+    </NuxtLink>
   </div>
 </template>
-
-<script setup lang="ts">
-import { useEditor, EditorContent } from '@tiptap/vue-3';
-import StarterKit from '@tiptap/starter-kit';
-import { onBeforeUnmount, ref } from 'vue';
-import Collaboration from '@tiptap/extension-collaboration';
-import * as Y from 'yjs';
-import { TiptapCollabProvider } from '@tiptap-pro/provider';
-
-const doc = new Y.Doc(); // Initialize Y.Doc for shared editing
-let provider: TiptapCollabProvider | null = null;
-
-const editorJson = ref('{}');
-
-const updateJson = () => {
-  if (editor.value) {
-    try {
-      editorJson.value = JSON.stringify(editor.value.getJSON(), null, 2);
-    } catch (error) {
-      editorJson.value = '{}';
-    }
-  }
-};
-
-const editor = useEditor({
-  extensions: [
-    StarterKit.configure({
-      undoRedo: false, // Disables default Undo/Redo extension to use Collaboration's history management
-    }),
-    Collaboration.configure({
-      document: doc, // Configure Y.Doc for collaboration
-    }),
-  ],
-  content: `
-    <h1>欢迎使用 Tiptap Editor</h1>
-  `,
-  editorProps: {
-    attributes: {
-      class:
-        'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[300px] p-4',
-    },
-  },
-  onUpdate: () => {
-    updateJson();
-  },
-  onCreate: () => {
-    updateJson();
-  },
-});
-
-const config = useRuntimeConfig();
-
-onMounted(async () => {
-  provider = new TiptapCollabProvider({
-    name: 'document.demo', // Unique document identifier for syncing. This is your document name.
-    appId: config.public.tiptap.documentServerId, // Your Cloud Dashboard AppID or `baseURL` for on-premises
-    token: config.public.tiptap.documentAppJwt, // Your JWT token
-    document: doc,
-  });
-});
-
-onBeforeUnmount(() => {
-  provider?.destroy();
-});
-
-onBeforeUnmount(() => {
-  editor.value?.destroy();
-});
-</script>
-
-<style>
-.ProseMirror {
-  outline: none;
-}
-
-.ProseMirror p.is-editor-empty:first-child::before {
-  color: #adb5bd;
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
-}
-</style>
