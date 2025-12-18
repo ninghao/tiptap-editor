@@ -10,8 +10,10 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@hocuspocus/provider": "^3.4.3",
     "@hocuspocus/transformer": "^3.4.3",
     "@iniso/ui": "workspace:*",
+    "lib0": "^0.2.115",
     "@tiptap-pro/extension-snapshot": "^3.3.0",
     "@tiptap-pro/extension-snapshot-compare": "3.3.0-alpha.10",
     "@tiptap-pro/provider": "^3.3.0",

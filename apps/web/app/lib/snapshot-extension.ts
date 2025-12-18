@@ -1,5 +1,5 @@
 import { Extension } from '@tiptap/core';
-import { TiptapCollabProvider, WebSocketStatus } from '@tiptap-pro/provider';
+import { TiptapCollabProvider, WebSocketStatus } from '~/lib/tiptap-collab-provider';
 import { TiptapTransformer } from '@hocuspocus/transformer';
 import * as Y from 'yjs';
 

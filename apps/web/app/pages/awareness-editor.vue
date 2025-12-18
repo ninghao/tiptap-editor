@@ -193,7 +193,7 @@ import StarterKit from '@tiptap/starter-kit';
 import { onBeforeUnmount, onMounted, ref, computed, nextTick } from 'vue';
 import Collaboration from '@tiptap/extension-collaboration';
 import * as Y from 'yjs';
-import { TiptapCollabProvider } from '@tiptap-pro/provider';
+import { TiptapCollabProvider } from '~/lib/tiptap-collab-provider';
 
 // ==================== Nuxt 配置 ====================
 const config = useRuntimeConfig();

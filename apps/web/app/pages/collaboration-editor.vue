@@ -143,7 +143,7 @@ import StarterKit from '@tiptap/starter-kit'; // Tiptap 基础功能包（包含
 import { onBeforeUnmount, onMounted, ref, computed, nextTick } from 'vue'; // Vue 3 组合式 API
 import Collaboration from '@tiptap/extension-collaboration'; // Tiptap 协作扩展
 import * as Y from 'yjs'; // Yjs CRDT 库，用于实现协作编辑
-import { TiptapCollabProvider } from '@tiptap-pro/provider'; // Tiptap Cloud Provider
+import { TiptapCollabProvider } from '~/lib/tiptap-collab-provider'; // Tiptap Cloud Provider
 
 // ==================== Nuxt 配置 ====================
 const config = useRuntimeConfig();
