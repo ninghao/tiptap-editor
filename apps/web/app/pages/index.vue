@@ -35,6 +35,12 @@
       >
         版本历史编辑器（Snapshot）
       </NuxtLink>
+      <NuxtLink
+        to="/snapshot-compare-editor"
+        class="inline-block px-6 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors text-center"
+      >
+        版本对比编辑器（Snapshot Compare）
+      </NuxtLink>
     </div>
   </div>
 </template>
