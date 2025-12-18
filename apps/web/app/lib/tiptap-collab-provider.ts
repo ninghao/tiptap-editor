@@ -2,6 +2,132 @@ import { HocuspocusProvider } from '@hocuspocus/provider';
 import { uuidv4 } from 'lib0/random';
 import * as Y from 'yjs';
 import { HocuspocusProviderWebsocket } from '@hocuspocus/provider';
+import type {
+  CompleteHocuspocusProviderWebsocketConfiguration,
+  HocuspocusProviderConfiguration,
+} from '@hocuspocus/provider';
+import { AbstractType, YArrayEvent } from 'yjs';
+
+// Type definitions
+interface AdditionalTiptapCollabProviderWebsocketConfiguration {
+  /**
+   * A Hocuspocus Cloud App ID, get one here: https://cloud.tiptap.dev
+   */
+  appId?: string;
+  /**
+   * If you are using the on-premise version of TiptapCollab, put your baseUrl here (e.g. https://collab.yourdomain.com)
+   */
+  baseUrl?: string | string[];
+  /**
+   * Only fill this if you are using Tiptap Collab HA.
+   */
+  shardKey?: string;
+}
+
+type TiptapCollabProviderWebsocketConfiguration =
+  Partial<CompleteHocuspocusProviderWebsocketConfiguration> &
+    AdditionalTiptapCollabProviderWebsocketConfiguration;
+
+interface TiptapCollabProviderWebsocketClusterConfiguration {
+  /**
+   * Timeout after which we fall over to the next server in no connection was successfully established
+   */
+  failOverIfNoConnectionAfterSeconds?: number;
+}
+
+type TCollabThread<Data = any, CommentData = any> = {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  resolvedAt?: string;
+  comments: TCollabComment<CommentData>[];
+  deletedComments: TCollabComment<CommentData>[];
+  data: Data;
+};
+
+type TCollabComment<Data = any> = {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
+  data: Data;
+  content: any;
+};
+
+type THistoryVersion = {
+  name?: string;
+  version: number;
+  date: number;
+};
+
+type DeleteCommentOptions = {
+  /**
+   * If `true`, the thread will also be deleted if the deleted comment was the first comment in the thread.
+   */
+  deleteThread?: boolean;
+  /**
+   * If `true`, will remove the content of the deleted comment
+   */
+  deleteContent?: boolean;
+};
+
+type DeleteThreadOptions = {
+  /**
+   * If `true`, will remove the comments on the thread,
+   * otherwise will only mark the thread as deleted
+   * and keep the comments
+   * @default false
+   */
+  deleteComments?: boolean;
+  /**
+   * If `true`, will forcefully remove the thread and all comments,
+   * otherwise will only mark the thread as deleted
+   * and keep the comments
+   * @default false
+   */
+  force?: boolean;
+};
+
+/**
+ * The type of thread
+ */
+type ThreadType = 'archived' | 'unarchived';
+
+type GetThreadsOptions = {
+  /**
+   * The types of threads to get
+   * @default ['unarchived']
+   */
+  types?: ThreadType[];
+};
+
+interface AdditionalTiptapCollabProviderConfiguration {
+  /**
+   * A Hocuspocus Cloud App ID, get one here: https://cloud.tiptap.dev
+   */
+  appId?: string;
+  /**
+   * If you are using the on-premise version of TiptapCollab, put your baseUrl here (e.g. https://collab.yourdomain.com)
+   */
+  baseUrl?: string;
+  websocketProvider?: TiptapCollabProviderWebsocket;
+  user?: string;
+}
+
+type TiptapCollabProviderConfiguration = Required<Pick<HocuspocusProviderConfiguration, 'name'>> &
+  Partial<HocuspocusProviderConfiguration> &
+  (
+    | Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'websocketProvider'>>
+    | Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'appId'>>
+    | Required<Pick<AdditionalTiptapCollabProviderConfiguration, 'baseUrl'>>
+  ) &
+  Pick<AdditionalTiptapCollabProviderConfiguration, 'user'> & {
+    /**
+     * Pass `true` if you want to delete a thread when the first comment is deleted.
+     */
+    deleteThreadOnFirstCommentDelete?: boolean;
+  };
 
 /**
  * WebSocket connection status enum
@@ -17,20 +143,21 @@ export enum WebSocketStatus {
  * Custom WebSocket provider for Tiptap Collaboration
  */
 export class TiptapCollabProviderWebsocket extends HocuspocusProviderWebsocket {
-  constructor(options: any) {
-    if (Array.isArray(options.baseUrl)) {
+  constructor(configuration: TiptapCollabProviderWebsocketConfiguration) {
+    if (Array.isArray(configuration.baseUrl)) {
       throw new Error('TiptapCollabProviderWebsocket does not support multiple baseUrls');
     }
 
-    let baseUrl: string = options.baseUrl ?? `wss://${options.appId}.collab.tiptap.cloud`;
+    let baseUrl: string =
+      configuration.baseUrl ?? `wss://${configuration.appId}.collab.tiptap.cloud`;
 
-    if (options.shardKey) {
+    if (configuration.shardKey) {
       baseUrl += baseUrl.includes('?') ? '&' : '?';
-      baseUrl += `shard=${options.shardKey}`;
+      baseUrl += `shard=${configuration.shardKey}`;
     }
 
     super({
-      ...options,
+      ...configuration,
       url: baseUrl,
     });
   }
@@ -39,14 +166,11 @@ export class TiptapCollabProviderWebsocket extends HocuspocusProviderWebsocket {
    * Create a cluster connection with failover support
    */
   static async createCluster(
-    appId: string,
-    options: {
-      baseUrl: string[];
-      failOverIfNoConnectionAfterSeconds?: number;
-      [key: string]: any;
-    },
+    name: string,
+    configuration: TiptapCollabProviderWebsocketConfiguration &
+      TiptapCollabProviderWebsocketClusterConfiguration,
   ): Promise<TiptapCollabProviderWebsocket> {
-    if (!Array.isArray(options.baseUrl)) {
+    if (!Array.isArray(configuration.baseUrl)) {
       throw new Error('Cluster requires baseUrl to be an array of nodes');
     }
 
@@ -54,20 +178,29 @@ export class TiptapCollabProviderWebsocket extends HocuspocusProviderWebsocket {
     const alternativeNodes: string[] = [];
     let nodeIndex = 0;
 
+    const baseUrls = Array.isArray(configuration.baseUrl)
+      ? configuration.baseUrl
+      : [configuration.baseUrl];
+
     // Find primary node
-    while (primaryNode === '' && nodeIndex < options.baseUrl.length) {
-      if (!options.baseUrl[nodeIndex]) {
+    while (primaryNode === '' && nodeIndex < baseUrls.length) {
+      if (!baseUrls[nodeIndex]) {
         nodeIndex += 1;
         continue;
       }
 
       try {
-        const nodeUrl = options.baseUrl[nodeIndex];
+        const nodeUrl = baseUrls[nodeIndex];
         if (!nodeUrl) {
           nodeIndex += 1;
           continue;
         }
         const httpUrl = nodeUrl.replace('ws://', 'http://').replace('wss://', 'https://');
+
+        const appId = configuration.appId;
+        if (!appId) {
+          throw new Error('appId is required for cluster creation');
+        }
 
         const response = await fetch(`${httpUrl}/publicapi/cluster/node/${appId}`);
 
@@ -87,7 +220,7 @@ export class TiptapCollabProviderWebsocket extends HocuspocusProviderWebsocket {
     }
 
     if (primaryNode === '') {
-      primaryNode = options.baseUrl[0] || '';
+      primaryNode = baseUrls[0] || '';
       if (!primaryNode) {
         throw new Error('No valid baseUrl provided');
       }
@@ -97,7 +230,7 @@ export class TiptapCollabProviderWebsocket extends HocuspocusProviderWebsocket {
     let failoverInterval: NodeJS.Timeout | null = null;
 
     const provider = new TiptapCollabProviderWebsocket({
-      ...options,
+      ...configuration,
       baseUrl: primaryNode,
       onDestroy() {
         if (failoverInterval) {
@@ -126,7 +259,7 @@ export class TiptapCollabProviderWebsocket extends HocuspocusProviderWebsocket {
       } else {
         failedNodes.splice(0, failedNodes.length);
       }
-    }, (options.failOverIfNoConnectionAfterSeconds ?? 5) * 1000);
+    }, (configuration.failOverIfNoConnectionAfterSeconds ?? 5) * 1000);
 
     return provider;
   }
@@ -151,8 +284,8 @@ const defaultDeleteThreadOptions = {
  * Main provider class for Tiptap Collaboration
  */
 export class TiptapCollabProvider extends HocuspocusProvider {
-  private tiptapCollabConfigurationPrefix = '__tiptapcollab__';
-  private userData?: Y.PermanentUserData;
+  tiptapCollabConfigurationPrefix: string = '__tiptapcollab__';
+  userData?: Y.PermanentUserData;
 
   // Expose configuration property from parent class
   declare configuration: any;
@@ -167,41 +300,42 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     return super.document;
   }
 
-  constructor(options: any) {
-    const shouldManageSocket = !options.websocketProvider;
+  constructor(configuration: TiptapCollabProviderConfiguration) {
+    const shouldManageSocket = !configuration.websocketProvider;
 
-    if (!options.websocketProvider) {
-      options.websocketProvider = new TiptapCollabProviderWebsocket({
-        appId: options.appId,
-        baseUrl: options.baseUrl,
-      });
+    if (!configuration.websocketProvider) {
+      const wsConfig: TiptapCollabProviderWebsocketConfiguration = {
+        appId: 'appId' in configuration ? configuration.appId : undefined,
+        baseUrl: 'baseUrl' in configuration ? configuration.baseUrl : undefined,
+      };
+      configuration.websocketProvider = new TiptapCollabProviderWebsocket(wsConfig);
     }
 
-    if (!options.token) {
-      options.token = 'notoken';
+    if (!configuration.token) {
+      configuration.token = 'notoken';
     }
 
-    super(options);
+    super(configuration as any);
 
     if (shouldManageSocket) {
       this.manageSocket = true;
       this.attach();
     }
 
-    if (options.user) {
+    if (configuration.user) {
       this.userData = new Y.PermanentUserData(
         this.document,
         this.document.getMap(`${this.tiptapCollabConfigurationPrefix}users`),
       );
-      this.userData.setUserMapping(this.document, this.document.clientID, options.user);
+      this.userData.setUserMapping(this.document, this.document.clientID, configuration.user);
     }
   }
 
   /**
    * Create a new version
    */
-  createVersion(name: string, force: boolean = false) {
-    return this.sendStateless(
+  createVersion(name?: string, force?: boolean): void {
+    this.sendStateless(
       JSON.stringify({
         action: 'version.create',
         name,
@@ -213,24 +347,25 @@ export class TiptapCollabProvider extends HocuspocusProvider {
   /**
    * Revert document to a specific version
    */
-  revertToVersion(version: string, fields: string[] = ['default']) {
-    return this.sendStateless(
+  revertToVersion(targetVersion: number, fields?: string[]): void {
+    this.sendStateless(
       JSON.stringify({
         action: 'document.revert',
-        version,
-        fields,
+        version: targetVersion,
+        fields: fields || ['default'],
       }),
     );
   }
 
   /**
    * Preview a specific version
+   * The server will reply with a stateless message (THistoryVersionPreviewEvent)
    */
-  previewVersion(version: string) {
-    return this.sendStateless(
+  previewVersion(targetVersion: number): void {
+    this.sendStateless(
       JSON.stringify({
         action: 'version.preview',
-        version,
+        version: targetVersion,
       }),
     );
   }
@@ -238,22 +373,28 @@ export class TiptapCollabProvider extends HocuspocusProvider {
   /**
    * Get all versions
    */
-  getVersions() {
-    return this.document.getArray(`${this.tiptapCollabConfigurationPrefix}versions`).toArray();
+  getVersions(): THistoryVersion[] {
+    return this.document
+      .getArray(`${this.tiptapCollabConfigurationPrefix}versions`)
+      .toArray() as THistoryVersion[];
   }
 
   /**
    * Watch for version changes
    */
-  watchVersions(callback: (event: any) => void) {
-    return this.document.getArray('__tiptapcollab__versions').observe(callback);
+  watchVersions(
+    callback: Parameters<AbstractType<YArrayEvent<THistoryVersion>>['observe']>[0],
+  ): void {
+    this.document.getArray('__tiptapcollab__versions').observe(callback as any);
   }
 
   /**
    * Unwatch version changes
    */
-  unwatchVersions(callback: (event: any) => void) {
-    return this.document.getArray('__tiptapcollab__versions').unobserve(callback);
+  unwatchVersions(
+    callback: Parameters<AbstractType<YArrayEvent<THistoryVersion>>['unobserve']>[0],
+  ): void {
+    this.document.getArray('__tiptapcollab__versions').unobserve(callback as any);
   }
 
   /**
@@ -268,28 +409,27 @@ export class TiptapCollabProvider extends HocuspocusProvider {
   /**
    * Set auto versioning interval
    */
-  setAutoVersioningInterval(intervalSeconds: number) {
-    return this.document
+  setAutoVersioningInterval(seconds: number): number {
+    this.document
       .getMap(`${this.tiptapCollabConfigurationPrefix}config`)
-      .set('intervalSeconds', intervalSeconds);
+      .set('intervalSeconds', seconds);
+    return seconds;
   }
 
   /**
    * Enable auto versioning
    */
-  enableAutoVersioning() {
-    return this.document
-      .getMap(`${this.tiptapCollabConfigurationPrefix}config`)
-      .set('autoVersioning', 1);
+  enableAutoVersioning(): 1 {
+    this.document.getMap(`${this.tiptapCollabConfigurationPrefix}config`).set('autoVersioning', 1);
+    return 1;
   }
 
   /**
    * Disable auto versioning
    */
-  disableAutoVersioning() {
-    return this.document
-      .getMap(`${this.tiptapCollabConfigurationPrefix}config`)
-      .set('autoVersioning', 0);
+  disableAutoVersioning(): 0 {
+    this.document.getMap(`${this.tiptapCollabConfigurationPrefix}config`).set('autoVersioning', 0);
+    return 0;
   }
 
   /**
@@ -308,30 +448,35 @@ export class TiptapCollabProvider extends HocuspocusProvider {
   }
 
   /**
-   * Get Yjs threads array
+   * Returns all users in the document as Y.Map objects
+   * @returns An array of Y.Map objects
    */
-  getYThreads() {
+  private getYThreads() {
     return this.document.getArray(`${this.tiptapCollabConfigurationPrefix}threads`);
   }
 
   /**
-   * Get threads
+   * Finds all threads in the document and returns them as JSON objects
+   * @options Options to control the output of the threads (e.g. include deleted threads)
+   * @returns An array of threads as JSON objects
    */
-  getThreads(options: { types?: ('archived' | 'unarchived')[] } = {}) {
+  getThreads<Data = any, CommentData = any>(
+    options?: GetThreadsOptions,
+  ): TCollabThread<Data, CommentData>[] {
     const mergedTypes = { ...defaultThreadOptions, ...options };
-    const types: ('archived' | 'unarchived')[] = (
+    const types: ThreadType[] = (
       mergedTypes.types ? [...mergedTypes.types] : ['unarchived']
-    ) as ('archived' | 'unarchived')[];
-    const threads = this.getYThreads().toJSON();
+    ) as ThreadType[];
+    const threads = this.getYThreads().toJSON() as TCollabThread<Data, CommentData>[];
 
-    const hasArchived = (types as string[]).includes('archived');
-    const hasUnarchived = (types as string[]).includes('unarchived');
+    const hasArchived = types.includes('archived');
+    const hasUnarchived = types.includes('unarchived');
 
     if (hasArchived && hasUnarchived) {
       return threads;
     }
 
-    return threads.filter((thread: any) => {
+    return threads.filter((thread) => {
       if (hasArchived && thread.deletedAt) {
         return true;
       }
@@ -343,14 +488,16 @@ export class TiptapCollabProvider extends HocuspocusProvider {
   }
 
   /**
-   * Get thread index by ID
+   * Find the index of a thread by its id
+   * @param id The thread id
+   * @returns The index of the thread or null if not found
    */
-  getThreadIndex(threadId: string): number | null {
+  private getThreadIndex(id: string): number | null {
     let index = null;
     let currentIndex = 0;
 
     for (const thread of this.getThreads({ types: ['archived', 'unarchived'] })) {
-      if (thread.id === threadId) {
+      if (thread.id === id) {
         index = currentIndex;
         break;
       }
@@ -361,22 +508,26 @@ export class TiptapCollabProvider extends HocuspocusProvider {
   }
 
   /**
-   * Get thread by ID
+   * Gets a single thread by its id
+   * @param id The thread id
+   * @returns The thread as a JSON object or null if not found
    */
-  getThread(threadId: string) {
-    const index = this.getThreadIndex(threadId);
+  getThread<Data = any, CommentData = any>(id: string): TCollabThread<Data, CommentData> | null {
+    const index = this.getThreadIndex(id);
     if (index === null) {
       return null;
     }
     const yThread = this.getYThreads().get(index) as Y.Map<unknown> | undefined;
-    return yThread ? (yThread.toJSON() as any) : null;
+    return yThread ? (yThread.toJSON() as TCollabThread<Data, CommentData>) : null;
   }
 
   /**
-   * Get Yjs thread by ID
+   * Gets a single thread by its id as a Y.Map object
+   * @param id The thread id
+   * @returns The thread as a Y.Map object or null if not found
    */
-  getYThread(threadId: string): Y.Map<unknown> | null {
-    const index = this.getThreadIndex(threadId);
+  private getYThread(id: string): Y.Map<unknown> | null {
+    const index = this.getThreadIndex(id);
     if (index === null) {
       return null;
     }
@@ -386,9 +537,16 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
   /**
    * Create a new thread
+   * @param data The thread data
+   * @returns The created thread
    */
-  createThread(data: any) {
-    let result: any = {};
+  createThread<Data = any, CommentData = any>(
+    data: Omit<
+      TCollabThread<Data, CommentData>,
+      'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'comments' | 'deletedComments'
+    >,
+  ): TCollabThread<Data, CommentData> {
+    let result: TCollabThread<Data, CommentData> = {} as TCollabThread<Data, CommentData>;
 
     this.document.transact(() => {
       const thread = new Y.Map();
@@ -399,22 +557,35 @@ export class TiptapCollabProvider extends HocuspocusProvider {
       thread.set('deletedAt', null);
 
       this.getYThreads().push([thread]);
-      result = this.updateThread(String(thread.get('id')), data);
+      result = this.updateThread(String(thread.get('id')), data) as TCollabThread<
+        Data,
+        CommentData
+      >;
     });
 
     return result;
   }
 
   /**
-   * Update a thread
+   * Update a specific thread
+   * @param id The thread id
+   * @param data New data for the thread
+   * @returns The updated thread or null if the thread is not found
    */
-  updateThread(threadId: string, data: any) {
-    let result: any = {};
+  updateThread<Data = any, CommentData = any>(
+    id: TCollabThread<Data, CommentData>['id'],
+    data: Partial<
+      Pick<TCollabThread<Data, CommentData>, 'data'> & {
+        resolvedAt: TCollabThread<Data, CommentData>['resolvedAt'] | null;
+      }
+    >,
+  ): TCollabThread<Data, CommentData> {
+    let result: TCollabThread<Data, CommentData> = {} as TCollabThread<Data, CommentData>;
 
     this.document.transact(() => {
-      const thread = this.getYThread(threadId);
+      const thread = this.getYThread(id);
       if (thread === null) {
-        return null;
+        throw new Error(`Thread with id ${id} not found`);
       }
 
       thread.set('updatedAt', new Date().toISOString());
@@ -427,29 +598,38 @@ export class TiptapCollabProvider extends HocuspocusProvider {
         thread.set('resolvedAt', data.resolvedAt);
       }
 
-      result = thread.toJSON();
+      result = thread.toJSON() as TCollabThread<Data, CommentData>;
     });
 
     return result;
   }
 
   /**
-   * Delete a thread
+   * Handle the deletion of a thread. By default, the thread and it's comments are not deleted, but marked as deleted
+   * via the `deletedAt` property. Forceful deletion can be enabled by setting the `force` option to `true`.
+   *
+   * If you only want to delete the comments of a thread, you can set the `deleteComments` option to `true`.
+   * @param id The thread id
+   * @param options A set of options that control how the thread is deleted
+   * @returns The deleted thread or null if the thread is not found
    */
-  deleteThread(threadId: string, options: { deleteComments?: boolean; force?: boolean } = {}) {
+  deleteThread<Data = any, CommentData = any>(
+    id: TCollabThread<Data, CommentData>['id'],
+    options?: DeleteThreadOptions,
+  ): TCollabThread<Data, CommentData> | null | undefined {
     const { deleteComments = false, force = false } = {
       ...defaultDeleteThreadOptions,
       ...options,
     };
 
-    const index = this.getThreadIndex(threadId);
+    const index = this.getThreadIndex(id);
     if (index === null) {
       return null;
     }
 
     if (force) {
       this.getYThreads().delete(index, 1);
-      return;
+      return undefined;
     }
 
     const thread = this.getYThreads().get(index) as Y.Map<unknown> | undefined;
@@ -464,14 +644,18 @@ export class TiptapCollabProvider extends HocuspocusProvider {
       thread.set('deletedComments', new Y.Array());
     }
 
-    return thread.toJSON();
+    return thread.toJSON() as TCollabThread<Data, CommentData>;
   }
 
   /**
-   * Restore a deleted thread
+   * Tries to restore a deleted thread
+   * @param id The thread id
+   * @returns The restored thread or null if the thread is not found
    */
-  restoreThread(threadId: string) {
-    const index = this.getThreadIndex(threadId);
+  restoreThread<Data = any, CommentData = any>(
+    id: TCollabThread<Data, CommentData>['id'],
+  ): TCollabThread<Data, CommentData> | null {
+    const index = this.getThreadIndex(id);
     if (index === null) {
       return null;
     }
@@ -483,13 +667,19 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
     thread.set('deletedAt', null);
 
-    return thread.toJSON();
+    return thread.toJSON() as TCollabThread<Data, CommentData>;
   }
 
   /**
-   * Get thread comments
+   * Returns comments from a thread, either deleted or not
+   * @param threadId The thread id
+   * @param includeDeleted If you want to include deleted comments, defaults to `false`
+   * @returns The comments or null if the thread is not found
    */
-  getThreadComments(threadId: string, includeDeleted: boolean = false) {
+  getThreadComments<CommentData = any>(
+    threadId: TCollabThread<any, CommentData>['id'],
+    includeDeleted?: boolean,
+  ): TCollabComment<CommentData>[] | null {
     if (this.getThreadIndex(threadId) === null) {
       return null;
     }
@@ -498,36 +688,51 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
     if (includeDeleted) {
       const allComments = [...(thread?.comments || []), ...(thread?.deletedComments || [])].sort(
-        (a: any, b: any) => a.createdAt.localeCompare(b.createdAt),
+        (a, b) => a.createdAt.localeCompare(b.createdAt),
       );
-      return allComments;
+      return allComments as TCollabComment<CommentData>[];
     }
 
-    return thread?.comments || [];
+    return (thread?.comments || []) as TCollabComment<CommentData>[];
   }
 
   /**
-   * Get a specific comment from a thread
+   * Get a single comment from a specific thread
+   * @param threadId The thread id
+   * @param commentId The comment id
+   * @param includeDeleted If you want to include deleted comments in the search
+   * @returns The comment or null if not found
    */
-  getThreadComment(threadId: string, commentId: string, includeDeleted: boolean = false) {
+  getThreadComment<CommentData = any>(
+    threadId: TCollabThread<any, CommentData>['id'],
+    commentId: TCollabComment<CommentData>['id'],
+    includeDeleted?: boolean,
+  ): TCollabComment<CommentData> | null {
     if (this.getThreadIndex(threadId) === null) {
       return null;
     }
 
     const comments = this.getThreadComments(threadId, includeDeleted);
-    return comments?.find((comment: any) => comment.id === commentId) ?? null;
+    return comments?.find((comment) => comment.id === commentId) ?? null;
   }
 
   /**
-   * Add a comment to a thread
+   * Adds a comment to a thread
+   * @param threadId The thread id
+   * @param data The comment data
+   * @returns The updated thread or null if the thread is not found
+   * @example addComment('123', { content: 'Hello world', data: { author: 'Maria Doe' } })
    */
-  addComment(threadId: string, data: any) {
-    let result: any = {};
+  addComment<Data = any, CommentData = any>(
+    threadId: TCollabThread<Data, CommentData>['id'],
+    data: Omit<TCollabComment<CommentData>, 'id' | 'updatedAt' | 'createdAt'>,
+  ): TCollabThread<Data, CommentData> {
+    let result: TCollabThread<Data, CommentData> = {} as TCollabThread<Data, CommentData>;
 
     this.document.transact(() => {
       const thread = this.getYThread(threadId);
       if (thread === null) {
-        return null;
+        throw new Error(`Thread with id ${threadId} not found`);
       }
 
       const comment = new Y.Map<unknown>();
@@ -539,27 +744,36 @@ export class TiptapCollabProvider extends HocuspocusProvider {
       }
 
       this.updateComment(threadId, String(comment.get('id')), data);
-      result = thread.toJSON();
+      result = thread.toJSON() as TCollabThread<Data, CommentData>;
     });
 
     return result;
   }
 
   /**
-   * Update a comment
+   * Update a comment in a thread
+   * @param threadId The thread id
+   * @param commentId The comment id
+   * @param data The new comment data
+   * @returns The updated thread or null if the thread or comment is not found
+   * @example updateComment('123', { content: 'The new content', data: { attachments: ['file1.jpg'] }})
    */
-  updateComment(threadId: string, commentId: string, data: any) {
-    let result: any = {};
+  updateComment<Data = any, CommentData = any>(
+    threadId: TCollabThread<Data, CommentData>['id'],
+    commentId: TCollabComment<CommentData>['id'],
+    data: Partial<Pick<TCollabComment<CommentData>, 'data' | 'content'>>,
+  ): TCollabThread<Data, CommentData> {
+    let result: TCollabThread<Data, CommentData> = {} as TCollabThread<Data, CommentData>;
 
     this.document.transact(() => {
       const thread = this.getYThread(threadId);
       if (thread === null) {
-        return null;
+        throw new Error(`Thread with id ${threadId} not found`);
       }
 
       const comments = thread.get('comments') as Y.Array<Y.Map<unknown>> | undefined;
       if (!comments) {
-        return null;
+        throw new Error(`Comments array not found for thread ${threadId}`);
       }
 
       let comment: Y.Map<unknown> | null = null;
@@ -571,7 +785,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
       }
 
       if (comment === null) {
-        return null;
+        throw new Error(`Comment with id ${commentId} not found in thread ${threadId}`);
       }
 
       comment.set('updatedAt', new Date().toISOString());
@@ -584,20 +798,24 @@ export class TiptapCollabProvider extends HocuspocusProvider {
         comment.set('content', data.content);
       }
 
-      result = thread.toJSON();
+      result = thread.toJSON() as TCollabThread<Data, CommentData>;
     });
 
     return result;
   }
 
   /**
-   * Delete a comment
+   * Deletes a comment from a thread
+   * @param threadId The thread id
+   * @param commentId The comment id
+   * @param options A set of options that control how the comment is deleted
+   * @returns The updated thread or null if the thread or comment is not found
    */
-  deleteComment(
-    threadId: string,
-    commentId: string,
-    options: { deleteContent?: boolean; deleteThread?: boolean } = {},
-  ) {
+  deleteComment<Data = any, CommentData = any>(
+    threadId: TCollabThread<Data, CommentData>['id'],
+    commentId: TCollabComment<CommentData>['id'],
+    options: DeleteCommentOptions,
+  ): TCollabThread<Data, CommentData> | null | undefined {
     const { deleteContent = false, deleteThread = false } = {
       ...defaultDeleteOptions,
       ...options,
@@ -623,7 +841,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
 
     if (commentIndex === 0 && deleteThread) {
       this.deleteThread(threadId);
-      return;
+      return undefined;
     }
 
     const comment = comments.get(commentIndex);
@@ -645,27 +863,29 @@ export class TiptapCollabProvider extends HocuspocusProvider {
     }
     comments.delete(commentIndex);
 
-    return thread.toJSON();
+    return thread.toJSON() as TCollabThread<Data, CommentData>;
   }
 
   /**
-   * Watch for thread changes
+   * Start watching threads for changes
+   * @param callback The callback function to be called when a thread changes
    */
-  watchThreads(callback: (event: any) => void) {
+  watchThreads(callback: () => void): void {
     this.getYThreads().observeDeep(callback);
   }
 
   /**
-   * Unwatch thread changes
+   * Stop watching threads for changes
+   * @param callback The callback function to be removed
    */
-  unwatchThreads(callback: (event: any) => void) {
+  unwatchThreads(callback: () => void): void {
     this.getYThreads().unobserveDeep(callback);
   }
 
   /**
    * Acquire a lock
    */
-  async acquireLock(key: string, timeout?: number): Promise<boolean> {
+  acquireLock(key: string, timeoutInMilliseconds: number): Promise<boolean> {
     return new Promise((resolve) => {
       const handler = (event: any) => {
         const payload = JSON.parse(event.payload);
@@ -682,7 +902,7 @@ export class TiptapCollabProvider extends HocuspocusProvider {
         JSON.stringify({
           action: 'mutex.request',
           key,
-          timeout,
+          timeout: timeoutInMilliseconds,
         }),
       );
     });
@@ -691,13 +911,14 @@ export class TiptapCollabProvider extends HocuspocusProvider {
   /**
    * Release a lock
    */
-  async releaseLock(key: string) {
+  releaseLock(key: string): Promise<void> {
     this.sendStateless(
       JSON.stringify({
         action: 'mutex.release',
         key,
       }),
     );
+    return Promise.resolve();
   }
 }
 
